@@ -139,8 +139,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-
-  return ~((~x)|(~y));
+	return ~((~x)|(~y));
 }
 /* 
  * getByte - Extract byte n from word x
@@ -168,12 +167,18 @@ int logicalShift(int x, int n) {
 /*
  * bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
- *   Legal ops: ! ~ & ^ | + << >>
+ *   Legal ops: ! (~ & ^ | + << >>
  *   Max ops: 40
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+	int mask1 = 0x55 | (0x55<<8) | (0x55 << 16) | (0x55<<24);
+	int mask2 = 0xaa | (0xaa<<8) | (0xaa << 16) | (0xaa<<24);
+	int y1 = x & mask1;
+	int y2 = x & mask2;
+	int a = (((y1 >> 1) + (y1 & 1) + 1)>>1) + (y2>>3) + ((y2 & 2)>>2);
+	int b = (a&0xff) + ((a>>8)&0xff) + ((a>>16)&0xff) + ((a>>24)&0xff);
+	return ((b>>4)&0x0f) + (b&0x0f);
 }
 /* 
  * bang - Compute !x without using !
@@ -183,7 +188,12 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+	/*
+	 * non-zeroes are either positive or negtive
+	 * for positive numbers, -x<0
+	 * while it's easy to identify one negtive number. 
+	 */
+	return (  ( (x>>31)&1 ) | ( ( (~x+1) >>31)&1 )  )^1;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -192,7 +202,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return (1<<31);
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -204,7 +214,15 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+	int mask = (1<<((~n)+1));
+	int temp = ( (1<<n)+(~1)+1 )&x;
+	return !(((!!(mask&temp))<<31) + temp + (~x) + 1);
+	temp <<= ((~n)+33);
+	temp >>= ((~n)+33);
+	return !(temp + (~x) + 1);
+
+	return !( ((1<<(n+(~1)+1))&x) | ~( (((1<<n)+(~1)+1)&x)+(~x)+1 ) );
+	return !( (((1<<n)+(~1)+1+(1<<31))&x) + (~x) + 1 );
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
