@@ -214,15 +214,7 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-	int mask = (1<<((~n)+1));
-	int temp = ( (1<<n)+(~1)+1 )&x;
-	return !(((!!(mask&temp))<<31) + temp + (~x) + 1);
-	temp <<= ((~n)+33);
-	temp >>= ((~n)+33);
-	return !(temp + (~x) + 1);
-
-	return !( ((1<<(n+(~1)+1))&x) | ~( (((1<<n)+(~1)+1)&x)+(~x)+1 ) );
-	return !( (((1<<n)+(~1)+1+(1<<31))&x) + (~x) + 1 );
+	return !( (x<<(33+(~n))>>(33+(~n)) )^x );
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -233,7 +225,7 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+    return (x>>((1<<n)+(~1)+1));
 }
 /* 
  * negate - return -x 
