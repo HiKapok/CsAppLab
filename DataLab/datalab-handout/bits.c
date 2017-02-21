@@ -225,7 +225,7 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return (x>>((1<<n)+(~1)+1));
+    return ( x+((!!((1<<31)&x)<<n)+(~(!!((1<<31)&x)))+1) )>>n;
 }
 /* 
  * negate - return -x 
@@ -235,7 +235,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return (~x)+1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -245,7 +245,7 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+	return !(((x>>31)&1)|!x);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -255,7 +255,8 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+	/** the same sign and the different sign */
+	return (  ( (!((x^y)>>31))&( ((x+(~y)+1)>>31)|!(x^y) ) )|( ((x^y)>>31)&(x>>31)&1 )  );
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -265,6 +266,7 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
+	
   return 2;
 }
 /* 
@@ -279,7 +281,8 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+	if(((uf&0x7F800000)^0x7F800000)|!(uf&0x007FFFFF)) return uf^(1<<31);
+	return uf;
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -291,6 +294,7 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
+	int temp = x&(1<<31);
   return 2;
 }
 /* 
