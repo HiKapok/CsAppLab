@@ -172,13 +172,10 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-	int mask1 = 0x55 | (0x55<<8) | (0x55 << 16) | (0x55<<24);
-	int mask2 = 0xaa | (0xaa<<8) | (0xaa << 16) | (0xaa<<24);
-	int y1 = x & mask1;
-	int y2 = x & mask2;
-	int a = (((y1 >> 1) + (y1 & 1) + 1)>>1) + (y2>>3) + ((y2 & 2)>>2);
-	int b = (a&0xff) + ((a>>8)&0xff) + ((a>>16)&0xff) + ((a>>24)&0xff);
-	return ((b>>4)&0x0f) + (b&0x0f);
+	int mask = ( (( (((0x01<<8)|0x01)<<8)|0x01 )<<8)|0x01 );
+	int temp = (x&mask)+((x>>1)&mask)+((x>>2)&mask)+((x>>3)&mask)+((x>>4)&mask)+((x>>5)&mask)+((x>>6)&mask)+((x>>7)&mask);
+	temp = (temp+(temp>>16));
+	return (((temp>>8)+temp)&0xff);
 }
 /* 
  * bang - Compute !x without using !
@@ -266,8 +263,16 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-	
-  return 2;
+	int ret = (!!(x&((~0)<<16)))<<4;
+	x >>= ret;
+	ret |= (!!((x>>8)&0xff))<<3;
+	x >>= (ret&0x08);
+	ret |= (!!((x>>4)&0x0f))<<2;
+	x >>= (ret&0x04);
+	ret |= (!!((x>>2)&0x03))<<1;
+	x >>= (ret&0x02);
+	ret |= (!!((x>>1)&0x01));
+	return ret;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -294,7 +299,12 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-	int temp = x&(1<<31);
+	int temp = x;
+	int count = 0;
+	if(!x) return 0;
+	if(temp<0) temp=-temp;
+	while(!((temp<<count)&(1<<31))) ++count;
+	return ((temp&(~((1<<31)>>count)))|(x&(1<<31)))+(((31-count)-127)<<23);
   return 2;
 }
 /* 
