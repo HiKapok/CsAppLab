@@ -1,2 +1,2 @@
 # CsAppLab
-Code for the CSAPP 3ed' Lab
+Code for the CSAPP 3rd' Lab
